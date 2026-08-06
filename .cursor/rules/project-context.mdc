@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+
+# Project Context — Psyched Up Fantasy Swimming
+
+## Architecture
+- **Monorepo** with four top-level domains: `backend/`, `frontend/`, `workers/`, infrastructure via `docker-compose.yml`.
+- **Backend:** Python FastAPI (async), SQLAlchemy 2.0, asyncpg, Redis for pub/sub and caching.
+- **Frontend:** Vite + React 18 + TypeScript (strict mode). Communicates via REST and WebSocket.
+- **Workers:** Standalone Python processes for data ingestion (PDF parsing, live timing feeds). Isolated from the API runtime.
+- **Data stores:** PostgreSQL 16 (primary), Redis 7 (cache / message broker).
+
+## Cross-Cutting Constraints
+- All code must be strictly typed (mypy strict / TypeScript strict).
+- Favor concurrency: async I/O in Python, concurrent React patterns (Suspense, transitions).
+- Every write operation must be idempotent — safe to retry without side effects.
+- Secrets live in environment variables, never committed.

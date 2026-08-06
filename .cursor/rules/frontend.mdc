@@ -1,0 +1,25 @@
+---
+globs:
+  - "frontend/**/*.tsx"
+  - "frontend/**/*.ts"
+---
+
+# Frontend Rules
+
+## Type Safety
+- TypeScript strict mode is non-negotiable (`strict: true`, `noUncheckedIndexedAccess: true`).
+- All component props must have explicit interface definitions — no inline anonymous types.
+- Avoid `as` type assertions; prefer type guards and narrowing.
+
+## Component Architecture
+- Use functional components exclusively.
+- Co-locate hooks with their consuming component unless reused across domains.
+- Modular hook patterns for WebSocket management (connect, reconnect, teardown).
+
+## Concurrency & Performance
+- Leverage React Suspense boundaries for async data loading.
+- Use `useTransition` for non-urgent state updates.
+- Memoize expensive computations with `useMemo`; stabilize callbacks with `useCallback` only when passed as props.
+
+## Styling
+- CSS Modules or a utility-first approach — no global unscoped styles.

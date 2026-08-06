@@ -1,0 +1,25 @@
+---
+globs:
+  - "backend/**/*.py"
+---
+
+# Backend Rules
+
+## Execution Model
+- All route handlers and service functions must be `async def`.
+- Use `asyncpg` via SQLAlchemy async engine — never synchronous database calls.
+- Long-running work must be dispatched to workers via Redis pub/sub or task queue.
+
+## Type Safety
+- Enforce `mypy --strict` compliance.
+- All request/response models must be Pydantic `BaseModel` subclasses with explicit field types.
+- No use of `Any` without a justifying comment.
+
+## Data Access
+- Follow SQLAlchemy 2.0 query style (select statements, not legacy Query API).
+- All mutations must be idempotent — use upsert patterns or conditional writes.
+- Wrap multi-step mutations in explicit transactions.
+
+## Structure
+- Organize by domain: `backend/routers/`, `backend/services/`, `backend/models/`, `backend/schemas/`.
+- Keep route handlers thin — delegate logic to service layer.
