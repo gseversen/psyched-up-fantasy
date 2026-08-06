@@ -3,26 +3,13 @@ globs:
   - "workers/**/*.py"
 ---
 
-# Workers Rules
+# Data Ingestion Standards (Python Workers)
 
-## Isolation
-- Workers are standalone processes — they must NOT import from `backend/`.
-- Shared types or constants belong in a `shared/` package if needed.
-- Each worker connects to Postgres and Redis independently.
+## Architecture
+* These workers run completely independent of the FastAPI backend.
+* Enforce strict idempotency: multiple runs over the same raw data must result in the same database state without duplicating scores.
 
-## Idempotency
-- Every ingestion run must be idempotent: re-processing the same source data produces no duplicate records.
-- Use content-based deduplication keys (e.g., hash of PDF + page range, or event timestamp + athlete ID).
-
-## Reliability
-- Implement structured error handling with exponential backoff on transient failures.
-- Log all ingestion runs with source identifier, record counts, and outcome.
-- Workers must be safe to kill and restart at any point (crash-only design).
-
-## Type Safety
-- Enforce `mypy --strict` compliance.
-- Use dataclasses or Pydantic models for all parsed data — no raw dicts beyond initial parsing.
-
-## Concurrency
-- Use `asyncio` for I/O-bound work (network fetches, DB writes).
-- Use `concurrent.futures.ProcessPoolExecutor` for CPU-bound PDF parsing.
+## Resilience & Dirty Data
+* Implement exponential backoff and retry logic for network requests or FTP polling.
+* Use Pydantic to aggressively type-cast and validate scraped HTML/regex data before attempting database inserts.
+* Log all anomalous data structures without crashing the worker process.

@@ -1,9 +1,0 @@
----
-globs: 
-    - "workers/**/*.py"
----
-
-# Data Worker Rules
-* Mandate idempotency.
-* Implement robust error handling and exponential backoff.
-* Maintain strict isolation from the main API.

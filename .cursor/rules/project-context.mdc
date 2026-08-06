@@ -1,18 +1,19 @@
 ---
+description: Global architectural constraints and tech stack definition.
+globs: ["*"]
 alwaysApply: true
 ---
+# Project Context: Fantasy Swimming League
 
-# Project Context — Psyched Up Fantasy Swimming
+## Core Tech Stack
+* Frontend: React + Vite (Strict TypeScript)
+* Backend: Python 3.11+ (FastAPI)
+* Database: PostgreSQL (Strictly normalized)
+* State/PubSub: Redis
+* Workers: Standalone Python daemon processes
 
-## Architecture
-- **Monorepo** with four top-level domains: `backend/`, `frontend/`, `workers/`, infrastructure via `docker-compose.yml`.
-- **Backend:** Python FastAPI (async), SQLAlchemy 2.0, asyncpg, Redis for pub/sub and caching.
-- **Frontend:** Vite + React 18 + TypeScript (strict mode). Communicates via REST and WebSocket.
-- **Workers:** Standalone Python processes for data ingestion (PDF parsing, live timing feeds). Isolated from the API runtime.
-- **Data stores:** PostgreSQL 16 (primary), Redis 7 (cache / message broker).
-
-## Cross-Cutting Constraints
-- All code must be strictly typed (mypy strict / TypeScript strict).
-- Favor concurrency: async I/O in Python, concurrent React patterns (Suspense, transitions).
-- Every write operation must be idempotent — safe to retry without side effects.
-- Secrets live in environment variables, never committed.
+## Global Engineering Standards
+* Prioritize high-performance, concurrent, and fault-tolerant code.
+* Assume data from ingestion sources is dirty and requires strict validation.
+* Separate client-facing APIs from background data ingestion.
+* Fail gracefully: Catch connection drops, API timeouts, and missing data without crashing the main thread.
