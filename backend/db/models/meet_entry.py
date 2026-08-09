@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base, BigIntPK
@@ -31,7 +31,9 @@ class MeetEntry(BigIntPK, Base):
     lane: Mapped[int | None] = mapped_column(Integer, nullable=True)
     entry_status: Mapped[str] = mapped_column(String(16), nullable=False)
     source_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    ingested_at: Mapped[datetime] = mapped_column(nullable=False)
+    ingested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
 
     meet_event: Mapped[MeetEvent] = relationship(back_populates="entries")
     athlete: Mapped[Athlete] = relationship(back_populates="entries")

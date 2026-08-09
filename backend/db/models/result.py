@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base, BigIntPK
@@ -33,7 +33,9 @@ class Result(BigIntPK, Base):
     source_type: Mapped[str] = mapped_column(String(32), nullable=False)
     source_uri: Mapped[str] = mapped_column(String(512), nullable=False)
     source_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    ingested_at: Mapped[datetime] = mapped_column(nullable=False)
+    ingested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
 
     meet_event: Mapped[MeetEvent] = relationship(back_populates="results")
     athlete: Mapped[Athlete] = relationship(back_populates="results")
