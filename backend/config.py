@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     db_max_overflow: int = 10
     db_echo: bool = False
+    ingestion_api_key: str = "dev-ingest-key"
 
 
 @lru_cache

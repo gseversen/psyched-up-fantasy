@@ -1,48 +1,16 @@
 import pytest
 import pytest_asyncio
 from datetime import date, datetime, timezone
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from backend.config import get_settings
-from backend.db.base import Base
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.db.models.athlete import Athlete
 from backend.db.models.event import Event
 from backend.db.models.meet import Meet
 from backend.db.models.meet_entry import MeetEntry
 from backend.db.models.meet_event import MeetEvent
 from backend.db.models.result import Result
-from backend.db.session import get_session
-from backend.main import app
-
-
-@pytest_asyncio.fixture
-async def session():
-    settings = get_settings()
-    engine = create_async_engine(settings.database_url)
-    async_session = async_sessionmaker(engine, expire_on_commit=False)
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    async with async_session() as sess:
-        async with sess.begin():
-            yield sess
-            await sess.rollback()
-
-    await engine.dispose()
-
-
-@pytest_asyncio.fixture
-async def client(session: AsyncSession):
-    async def _override_session():
-        yield session
-
-    app.dependency_overrides[get_session] = _override_session
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
-    app.dependency_overrides.clear()
 
 
 @pytest_asyncio.fixture

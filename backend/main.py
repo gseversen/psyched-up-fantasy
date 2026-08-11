@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.config import get_settings
 from backend.db.session import dispose_engine, get_session, init_engine
 from backend.routers.meets import router as meets_router
+from backend.routers.internal_ingestion import router as ingestion_router
 
 
 class HealthResponse(BaseModel):
@@ -31,6 +32,7 @@ app = FastAPI(
 )
 
 app.include_router(meets_router)
+app.include_router(ingestion_router)
 
 
 @app.get("/health", response_model=HealthResponse)
