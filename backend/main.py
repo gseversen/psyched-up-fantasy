@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import get_settings
 from backend.db.session import dispose_engine, get_session, init_engine
+from backend.routers.meets import router as meets_router
 
 
 class HealthResponse(BaseModel):
@@ -28,6 +29,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.include_router(meets_router)
 
 
 @app.get("/health", response_model=HealthResponse)
