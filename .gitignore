@@ -17,3 +17,6 @@ frontend/dist/
 # OS / IDE
 .DS_Store
 *.swp
+
+# Local test fixtures (large PDFs, proprietary data)
+workers/fixtures/local/

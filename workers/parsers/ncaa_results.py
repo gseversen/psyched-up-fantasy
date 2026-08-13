@@ -163,9 +163,30 @@ def parse_ncaa_text(text: str) -> list[ParsedRow]:
 
 
 def parse_pdf_file(path: Path) -> list[ParsedRow]:
-    """Parse a PDF file. For the fixture format, reads as plain text.
+    """Parse a PDF file. Auto-detects binary PDF vs plain text fixture.
 
-    In production, this would use pdfplumber or similar to extract text first.
+    For binary PDFs, uses pdfplumber to extract text.
+    For text fixtures (like sample.pdf), reads as plain text.
     """
-    text = path.read_text(encoding="utf-8", errors="replace")
+    raw = path.read_bytes()
+    if raw[:5] == b"%PDF-":
+        try:
+            from workers.parsers.ncaa_psych_sheet import parse_psych_sheet
+            rows = parse_psych_sheet(path)
+            if rows:
+                return rows
+        except Exception as exc:
+            logger.warning("Psych sheet parser failed, trying results parser: %s", exc)
+
+        import pdfplumber
+        with pdfplumber.open(str(path)) as pdf:
+            text_parts = []
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_parts.append(page_text)
+            text = "\n".join(text_parts)
+        return parse_ncaa_text(text)
+
+    text = raw.decode("utf-8", errors="replace")
     return parse_ncaa_text(text)
