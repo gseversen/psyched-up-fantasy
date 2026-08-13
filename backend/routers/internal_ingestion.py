@@ -9,6 +9,7 @@ from backend.schemas.ingestion import (
     BatchUpsertResponse,
     EntryBatchUpsertRequest,
     EntryUpsertRequest,
+    MeetEventsLookupResponse,
     ResultBatchUpsertRequest,
     ResultUpsertRequest,
     UpsertResponse,
@@ -17,6 +18,7 @@ from backend.services.ingestion_service import (
     ForeignKeyError,
     batch_upsert_entries,
     batch_upsert_results,
+    lookup_meet_events,
     upsert_athlete,
     upsert_entry,
     upsert_result,
@@ -97,3 +99,11 @@ async def handle_result_batch(
         )
     await session.commit()
     return result
+
+
+@router.get("/meets/{meet_id}/events", response_model=MeetEventsLookupResponse)
+async def handle_meet_events_lookup(
+    meet_id: int,
+    session: AsyncSession = Depends(get_session),
+) -> MeetEventsLookupResponse:
+    return await lookup_meet_events(session, meet_id)

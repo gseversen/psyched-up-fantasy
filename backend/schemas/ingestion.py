@@ -141,3 +141,16 @@ class BatchUpsertResponse(BaseModel):
     updated: int
     unchanged: int
     total: int
+
+
+# --- Meet Events Lookup ---
+
+
+class MeetEventMapping(BaseModel):
+    event_number: int
+    meet_event_id: int
+
+
+class MeetEventsLookupResponse(BaseModel):
+    meet_id: int
+    events: list[MeetEventMapping]

@@ -12,6 +12,8 @@ from backend.schemas.ingestion import (
     BatchUpsertResponse,
     EntryBatchUpsertRequest,
     EntryUpsertRequest,
+    MeetEventMapping,
+    MeetEventsLookupResponse,
     ResultBatchUpsertRequest,
     ResultUpsertRequest,
     UpsertAction,
@@ -186,3 +188,18 @@ async def batch_upsert_results(
         unchanged=counts[UpsertAction.UNCHANGED],
         total=len(payload.results),
     )
+
+
+async def lookup_meet_events(
+    session: AsyncSession, meet_id: int
+) -> MeetEventsLookupResponse:
+    result = await session.execute(
+        select(MeetEvent.event_number, MeetEvent.id).where(
+            MeetEvent.meet_id == meet_id
+        )
+    )
+    mappings = [
+        MeetEventMapping(event_number=row.event_number, meet_event_id=row.id)
+        for row in result.all()
+    ]
+    return MeetEventsLookupResponse(meet_id=meet_id, events=mappings)
