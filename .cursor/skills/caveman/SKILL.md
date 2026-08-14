@@ -85,7 +85,3 @@ Example — destructive:
 Code, commits, PR bodies, issue text: write **normal** (or use `commit-messages` / `pull-requests` skills). Caveman shrinks **chat prose only**.
 
 `stop caveman` / `normal mode`: revert. Level sticks until changed or session ends.
-
-## With tmestz-skills
-
-Other skills still apply (tests 1+3, lint hygiene, security). Caveman only changes how you **talk**, not what you **do**.
