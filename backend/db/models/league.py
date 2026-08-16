@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, String
+from sqlalchemy import BigInteger, ForeignKey, SmallInteger, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base, BigIntPK, TimestampMixin
@@ -24,6 +24,13 @@ class League(BigIntPK, TimestampMixin, Base):
     owner_id: Mapped[int] = mapped_column(
         BigInteger, ForeignKey("users.id"), index=True, nullable=False
     )
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default="setup"
+    )
+    roster_size: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, server_default="8"
+    )
+    draft_order: Mapped[list[int] | None] = mapped_column(JSONB, nullable=True)
 
     owner: Mapped[User] = relationship(back_populates="owned_leagues")
     meet: Mapped[Meet] = relationship(back_populates="leagues")

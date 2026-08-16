@@ -1,3 +1,15 @@
-from backend.schemas.meets import AthleteSummary, MeetResponse, ResultResponse
+from backend.schemas.meets import (
+    AthleteSummary,
+    EntryResponse,
+    MeetEventResponse,
+    MeetResponse,
+    ResultResponse,
+)
 
-__all__ = ["AthleteSummary", "MeetResponse", "ResultResponse"]
+__all__ = [
+    "AthleteSummary",
+    "EntryResponse",
+    "MeetEventResponse",
+    "MeetResponse",
+    "ResultResponse",
+]

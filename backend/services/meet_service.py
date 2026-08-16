@@ -1,11 +1,20 @@
-from sqlalchemy import select
+from sqlalchemy import func, nulls_last, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from backend.db.models.athlete import Athlete
+from backend.db.models.event import Event
 from backend.db.models.meet import Meet
+from backend.db.models.meet_entry import MeetEntry
 from backend.db.models.meet_event import MeetEvent
 from backend.db.models.result import Result
-from backend.schemas.meets import AthleteSummary, MeetResponse, ResultResponse
+from backend.schemas.meets import (
+    AthleteSummary,
+    EntryResponse,
+    MeetEventResponse,
+    MeetResponse,
+    ResultResponse,
+)
 
 
 async def get_meet(session: AsyncSession, meet_id: int) -> MeetResponse | None:
@@ -65,4 +74,84 @@ async def get_meet_results(
             result_status=r.result_status,
         )
         for r in results
+    ]
+
+
+async def _meet_exists(session: AsyncSession, meet_id: int) -> bool:
+    result = await session.execute(select(Meet.id).where(Meet.id == meet_id))
+    return result.scalar_one_or_none() is not None
+
+
+def _athlete_summary(athlete: Athlete) -> AthleteSummary:
+    return AthleteSummary(
+        id=athlete.id,
+        first_name=athlete.first_name,
+        last_name=athlete.last_name,
+        team_display=athlete.team_display,
+    )
+
+
+async def get_meet_entries(
+    session: AsyncSession, meet_id: int
+) -> list[EntryResponse] | None:
+    if not await _meet_exists(session, meet_id):
+        return None
+
+    stmt = (
+        select(MeetEntry)
+        .join(MeetEntry.meet_event)
+        .where(MeetEvent.meet_id == meet_id)
+        .options(
+            selectinload(MeetEntry.meet_event).selectinload(MeetEvent.event),
+            selectinload(MeetEntry.athlete),
+        )
+        .order_by(
+            MeetEvent.event_number,
+            nulls_last(MeetEntry.seed_time_cs.asc()),
+        )
+    )
+    rows = await session.execute(stmt)
+    entries = rows.scalars().all()
+
+    return [
+        EntryResponse(
+            entry_id=e.id,
+            event_number=e.meet_event.event_number,
+            event_name=e.meet_event.event.name,
+            athlete=_athlete_summary(e.athlete),
+            seed_time_cs=e.seed_time_cs,
+            entry_status=e.entry_status,
+        )
+        for e in entries
+    ]
+
+
+async def get_meet_events(
+    session: AsyncSession, meet_id: int
+) -> list[MeetEventResponse] | None:
+    if not await _meet_exists(session, meet_id):
+        return None
+
+    stmt = (
+        select(
+            MeetEvent.event_number,
+            Event.name,
+            Event.gender,
+            func.count(MeetEntry.id).label("entry_count"),
+        )
+        .join(MeetEvent.event)
+        .outerjoin(MeetEntry, MeetEntry.meet_event_id == MeetEvent.id)
+        .where(MeetEvent.meet_id == meet_id)
+        .group_by(MeetEvent.id, MeetEvent.event_number, Event.name, Event.gender)
+        .order_by(MeetEvent.event_number)
+    )
+    rows = await session.execute(stmt)
+    return [
+        MeetEventResponse(
+            event_number=row.event_number,
+            event_name=row.name,
+            gender=row.gender,
+            entry_count=row.entry_count,
+        )
+        for row in rows.all()
     ]

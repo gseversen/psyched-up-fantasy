@@ -32,3 +32,23 @@ class ResultResponse(BaseModel):
     final_time_cs: int | None
     place: int | None
     result_status: str
+
+
+class EntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    entry_id: int
+    event_number: int
+    event_name: str
+    athlete: AthleteSummary
+    seed_time_cs: int | None
+    entry_status: str
+
+
+class MeetEventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    event_number: int
+    event_name: str
+    gender: str
+    entry_count: int

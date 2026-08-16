@@ -91,3 +91,44 @@ async def test_get_meet_results(client: AsyncClient, seeded_meet: int):
 async def test_get_meet_results_not_found(client: AsyncClient):
     resp = await client.get("/api/v1/meets/999999/results")
     assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_meet_entries(client: AsyncClient, seeded_meet: int):
+    resp = await client.get(f"/api/v1/meets/{seeded_meet}/entries")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    entry = data[0]
+    assert entry["event_name"] == "100 Yard Freestyle"
+    assert entry["event_number"] == 1
+    assert entry["seed_time_cs"] == 4500
+    assert entry["entry_status"] == "confirmed"
+    assert entry["athlete"]["first_name"] == "Test"
+    assert entry["athlete"]["last_name"] == "Swimmer"
+    assert entry["athlete"]["team_display"] == "Test Univ"
+
+
+@pytest.mark.asyncio
+async def test_get_meet_entries_not_found(client: AsyncClient):
+    resp = await client.get("/api/v1/meets/999999/entries")
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_meet_events(client: AsyncClient, seeded_meet: int):
+    resp = await client.get(f"/api/v1/meets/{seeded_meet}/events")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    event = data[0]
+    assert event["event_number"] == 1
+    assert event["event_name"] == "100 Yard Freestyle"
+    assert event["gender"] == "M"
+    assert event["entry_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_meet_events_not_found(client: AsyncClient):
+    resp = await client.get("/api/v1/meets/999999/events")
+    assert resp.status_code == 404
